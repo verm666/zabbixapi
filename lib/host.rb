@@ -20,6 +20,7 @@ module Zabbix
     #   - ip - host's ip address. Used for monitoring host if useip set to 1. Default: '0.0.0.0';
     #   - proxy_hostid - host_id of zabbix proxy (if necessary). See <tt>get_host_id</tt>. Default: 0 (don't use proxy server);
     #   - groups - array of groups that belong host. Default: []. 
+    #   - templates - array of templates that belong host. Default: []. 
     #   - useipmi - Use or not ipmi. Default: 0 (don't use ipmi);
     #   - ipmi_ip - Default: '';
     #   - ipmi_port - Default: 623;
@@ -39,6 +40,7 @@ module Zabbix
         'ip' => '0.0.0.0',
         'proxy_hostid' => 0,
         'groups' => [],
+        'templates' => [],
         'useipmi' => 0,
         'ipmi_ip' => '',
         'ipmi_port' => 623,
@@ -49,12 +51,51 @@ module Zabbix
       }
 
       host_options['groups'].map! { |group_id| {'groupid' => group_id} }
+      host_options['templates'].map! { |template_id| {'templateid' => template_id} } if host_options['templates']
 
       host = merge_opt(host_default, host_options)
 
       message = {
         'method' => 'host.create',
         'params' => host
+      }
+
+      responce = send_request(message)
+
+      if not ( responce.empty? ) then
+        result = responce['hostids'][0].to_i
+      else
+        result = nil
+      end
+
+      return result
+    end
+
+    # Method for updating host in zabbix.
+    # * Input parameter - hash <tt>host_options</tt>. Available keys in hash:
+    #   - host - hostname. Type: string. Default: nil;
+    #   - port - zabbix agent pont. Type: int. Default: 10050;
+    #   - status - host status. Type: int. Possible values: 0 - monitored, 1 - not monitored. Default: 0; 
+    #   - useip - use ip or dns name for monitoring host. Possible values: 0 - don't use ip (use dns name), 1 - use ip (don't use dns name);
+    #   - ip - host's ip address. Used for monitoring host if useip set to 1. Default: '0.0.0.0';
+    #   - proxy_hostid - host_id of zabbix proxy (if necessary). See <tt>get_host_id</tt>. Default: 0 (don't use proxy server);
+    #   - groups - array of groups that belong host. Default: []. 
+    #   - templates - array of templates that belong host. Default: []. 
+    #   - useipmi - Use or not ipmi. Default: 0 (don't use ipmi);
+    #   - ipmi_ip - Default: '';
+    #   - ipmi_port - Default: 623;
+    #   - ipmi_authtype - Default: 0;
+    #   - ipmi_privilege - Default: 0;
+    #   - ipmi_username - Default: '';
+    #   - ipmi_password - Default: '';
+    def update_host(host_options)
+
+      host_options['groups'].map! { |group_id| {'groupid' => group_id} } if host_options['groups']
+      host_options['templates'].map! { |template_id| {'templateid' => template_id} } if host_options['templates']
+
+      message = {
+        'method' => 'host.update',
+        'params' => host_options
       }
 
       responce = send_request(message)
