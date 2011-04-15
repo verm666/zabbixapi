@@ -95,7 +95,11 @@ module Zabbix
       responce = send_request(message)
 
       if not ( responce.empty? ) then
-        result = responce.keys[0]
+        result = if responce.is_a?(Hash)
+          responce.keys[0]
+        elsif responce.is_a?(Array)
+          responce[0]['templateid']
+        end
       else
         result = nil
       end
