@@ -49,6 +49,7 @@ module Zabbix
       }
 
       host_options['groups'].map! { |group_id| {'groupid' => group_id} }
+      host_options['templates'].map! { |group_id| {'templateid' => group_id} }
 
       host = merge_opt(host_default, host_options)
 
