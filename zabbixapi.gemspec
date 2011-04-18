@@ -1,3 +1,7 @@
+require 'rubygems'
+require 'rake'
+require 'echoe'
+
 Gem::Specification.new do |spec|
 
   spec.version = '0.1.4'
@@ -12,6 +16,5 @@ Gem::Specification.new do |spec|
   spec.has_rdoc = true
   spec.extra_rdoc_files  = 'README.rdoc'
 
-
-  spec.files = FileList["lib/*.rb", "bin/*", "spec/*", 'zabbixapi.gemspec', 'README.rdoc'].to_a
+  spec.files = `git ls-files`.split("\n")
 end
