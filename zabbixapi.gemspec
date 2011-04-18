@@ -1,7 +1,3 @@
-require 'rubygems'
-require 'rake'
-require 'echoe'
-
 Gem::Specification.new do |spec|
 
   spec.version = '0.1.4'
