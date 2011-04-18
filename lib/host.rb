@@ -39,6 +39,7 @@ module Zabbix
         'ip' => '0.0.0.0',
         'proxy_hostid' => 0,
         'groups' => [],
+        'templates' => [],
         'useipmi' => 0,
         'ipmi_ip' => '',
         'ipmi_port' => 623,
