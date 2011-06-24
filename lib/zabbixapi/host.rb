@@ -38,7 +38,7 @@ module Zabbix
         result = nil
       end
 
-      return result
+      result
     end
 
     def get_host_id(hostname)
@@ -60,7 +60,26 @@ module Zabbix
         result = nil
       end
 
-      return result
+      result
     end
+
+    def get_host(params)
+
+      message = {
+        'method' => 'host.get',
+        'params' => params
+      }
+
+      response = send_request(message)
+
+      unless response.empty? then
+        result = response[0]
+      else
+        result = nil
+      end
+
+      result
+    end
+
   end
 end

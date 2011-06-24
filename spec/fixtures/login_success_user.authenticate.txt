@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+X-powered-by: PHP/5.3.3
+Connection: close
+Content-type: application/json
+Date: Thu, 23 Jun 2011 19:30:57 GMT
+Server: Apache/2.2.15 (Linux/SUSE)
+Content-length: 72
+Set-cookie: zbx_sessionid=9f1404eb20c67cb91eb5edd44973d963zbx_sessionid=15de32a5993270961e6265421566357ezbx_sessionid=deleted; expires=Wed, 23-Jun-2010 19:30:56 GMT
+
+{"jsonrpc":"2.0","result":"9f1404eb20c67cb91eb5edd44973d963","id":31113}
