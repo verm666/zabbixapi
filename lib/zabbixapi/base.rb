@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 
-require 'json'
+require 'yajl/json_gem'
 require 'net/http'
 require 'net/https'
 
@@ -18,6 +18,9 @@ module Zabbix
   class AlreadyExist < RuntimeError
   end
 
+  class AuthError < RuntimeError
+  end
+
   class ZabbixApi
 
     attr_accessor :debug
@@ -26,6 +29,7 @@ module Zabbix
       @api_url = api_url
       @api_user = api_user
       @api_password = api_password
+      @auth_id = nil
 
       @debug = false # Disable debug by default
     end
@@ -61,6 +65,9 @@ module Zabbix
 
       if @debug
         puts "[ZBXAPI] : INFO : Response start"
+        response.each_header do |key,value|
+          puts "#{key}:#{value}"
+        end
         puts response
         puts "[ZBXAPI] : INFO : Response end"
       end
@@ -76,8 +83,7 @@ module Zabbix
         error_data = error['data']
         error_code = error['code']
 
-        e_message = "Code: [" + error_code.to_s + "]. Message: [" + error_message +\
-              "]. Data: [" + error_data + "]."
+        e_message = "Code: [" + error_code.to_s + "]. Message: [" + error_message + "]. Data: [" + error_data + "]."
 
         case error_code.to_s 
         when '-32602'
@@ -88,8 +94,7 @@ module Zabbix
       end
 
       result = response_body_hash['result']
-
-      return result
+      result
     end
 
     def send_request(message)
@@ -98,6 +103,8 @@ module Zabbix
     end
 
     def auth()
+
+      return @auth_id if @auth_id
 
       auth_message = {
         'auth' =>  nil,
@@ -109,9 +116,11 @@ module Zabbix
         }
       }
 
-      auth_id = do_request(auth_message)
-
-      return auth_id
+      begin
+        @auth_id = do_request(auth_message)
+      rescue RuntimeError => e
+        raise AuthError.new(e.message)
+      end
     end
 
 # Utils. 

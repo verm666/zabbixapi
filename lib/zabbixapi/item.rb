@@ -1,27 +1,28 @@
 module Zabbix
+      ## Item types (see ./frontends/php/include/defines.inc.php in zabbix source)
+      ITEM_TYPE_ZABBIX        = 0
+      ITEM_TYPE_SNMPV1        = 1
+      ITEM_TYPE_TRAPPER       = 2
+      ITEM_TYPE_SIMPLE        = 3
+      ITEM_TYPE_SNMPV2C       = 4
+      ITEM_TYPE_INTERNAL      = 5
+      ITEM_TYPE_SNMPV3        = 6
+      ITEM_TYPE_ZABBIX_ACTIVE = 7
+      ITEM_TYPE_AGGREGATE     = 8
+      ITEM_TYPE_HTTPTEST      = 9
+      ITEM_TYPE_EXTERNAL      = 10
+      ITEM_TYPE_DB_MONITOR    = 11
+      ITEM_TYPE_IPMI          = 12
+      ITEM_TYPE_SSH           = 13
+      ITEM_TYPE_TELNET        = 14
+      ITEM_TYPE_CALCULATED    = 15
+
   class ZabbixApi
+
     def add_item(item)
       
       # Default item options
       # See: http://www.zabbix.com/documentation/1.8/api/item
-
-      ## Item types (see ./frontends/php/include/defines.inc.php in zabbix source)
-      # ITEM_TYPE_ZABBIX              0
-      # ITEM_TYPE_SNMPV1              1
-      # ITEM_TYPE_TRAPPER             2
-      # ITEM_TYPE_SIMPLE              3
-      # ITEM_TYPE_SNMPV2C             4
-      # ITEM_TYPE_INTERNAL            5
-      # ITEM_TYPE_SNMPV3              6
-      # ITEM_TYPE_ZABBIX_ACTIVE       7
-      # ITEM_TYPE_AGGREGATE           8
-      # ITEM_TYPE_HTTPTEST            9
-      # ITEM_TYPE_EXTERNAL            10
-      # ITEM_TYPE_DB_MONITOR          11
-      # ITEM_TYPE_IPMI                12
-      # ITEM_TYPE_SSH                 13
-      # ITEM_TYPE_TELNET              14
-      # ITEM_TYPE_CALCULATED          15
 
       item_options = {
         'description'           => nil,
