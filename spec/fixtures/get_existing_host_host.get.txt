@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+X-powered-by: PHP/5.3.3
+Connection: close
+Content-type: application/json
+Date: Thu, 23 Jun 2011 20:17:10 GMT
+Server: Apache/2.2.15 (Linux/SUSE)
+Content-length: 58
+
+{"jsonrpc":"2.0","result":[{"hostid":"10052"}],"id":21226}

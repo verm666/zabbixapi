@@ -58,11 +58,38 @@ describe Zabbix::ZabbixApi do
 
   context 'get host' do
 
-    before(:each) do
-      #@zbx = Zabbix::ZabbixApi.new(@api_url, @api_login, @api_password)
+    FakeWeb.register_uri(:post, "http://192.168.1.29/get_existing_host_host.get.txt",
+                         [:response => fixture_file("login_success_user.authenticate.txt"),
+                          :response => fixture_file("get_existing_host_host.get.txt")])
+    FakeWeb.register_uri(:post, "http://192.168.1.29/get_nil_for_unknown_host_host.get.txt",
+                         [:response => fixture_file("login_success_user.authenticate.txt"),
+                          :response => fixture_file("get_nil_for_unknown_host_host.get.txt")])
+
+    it "should get the host" do
+      api_url = "http://192.168.1.29/get_existing_host_host.get.txt"
+      zbx = Zabbix::ZabbixApi.new(api_url, @api_login, @api_password)
+
+      RecordHttp.file_prefix = 'get_existing_host'
+      RecordHttp.perform_save = false
+
+      FakeWeb.allow_net_connect = false
+
+      host = zbx.get_host({"filter" => {"dns" => "vagrantup.com"}})
+      host.should_not be_nil
     end
 
-    it "should get the title" do
+    it "should not get a unknown host" do
+
+      api_url = "http://192.168.1.29/get_nil_for_unknown_host_host.get.txt"
+      zbx = Zabbix::ZabbixApi.new(api_url, @api_login, @api_password)
+
+      RecordHttp.file_prefix = 'get_nil_for_unknown_host'
+      RecordHttp.perform_save = false
+
+      FakeWeb.allow_net_connect = false
+
+      host = zbx.get_host({"filter" => {"dns" => "no-host.com"}})
+      host.should be_nil
     end
 
   end
