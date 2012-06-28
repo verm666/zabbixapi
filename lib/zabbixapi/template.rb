@@ -2,13 +2,20 @@ module Zabbix
 
   class ZabbixApi
 
-	def remove_templates_from_host(host, templates)
-	  template_ids = []
-	  templates_to_remove = []
+    def is_template_linked_with_host?(hostid, template)
+	  template_id = get_template_id(template)
+	  host_template_ids = []
 
-      templates.each do |template|
-		template_ids << self.get_template_id(template)
-      end
+	  #Get linked templates
+      linked_templates = get_template_ids_by_host(hostid)
+	  linked_templates.each { |result| host_template_ids << result['templateid'] }
+
+      return host_template_ids.include? template_id
+    end
+
+	def remove_templates_from_host(host, templates)
+	  template_ids = get_template_ids(templates)
+	  templates_to_remove = []
 
 	  #The host.update method requires a hash parameter for new templates
 	  template_ids.each do |template_id|
@@ -16,29 +23,18 @@ module Zabbix
 	  end
 
       template_ids.each do |template_id|
-	    result = self.update_host({'hostid' => host['hostid'], 'templates_clear' => templates_to_remove})
+	    result = update_host({'hostid' => host['hostid'], 'templates_clear' => templates_to_remove})
       end
 	end
 
     def add_templates_to_host(host, templates)
 	  host_template_ids = []
-	  new_template_ids = []
 	  templates_to_add = []
+	  new_template_ids = get_template_ids(templates)
 
 	  #Get linked templates
-	  unless host['parentTemplates'].empty? then
-	    host['parentTemplates'].each do |p_template|
-		host_template_ids << p_template['hostid']
-	  end
-	  else
-	    puts 'no parent templates'
-	  end
-
-	  #Get template ids from each of the new templates to be added
-	  templates.each do |template|
-		new_template_ids << self.get_template_id(template)
-	  end
-
+      linked_templates = get_template_ids_by_host(host['hostid'])
+	  linked_templates.each { |result| host_template_ids << result['templateid'] }
 
 	  #We want to add both the old templates and the new ones to the host
 	  template_ids_union = new_template_ids | host_template_ids
@@ -50,7 +46,7 @@ module Zabbix
 
 	  #Finally, add the templates to the host
 	  template_ids_union.each do |template_id|
-		result = self.update_host({'hostid' => host['hostid'], 'templates' => templates_to_add})
+		result = update_host({'hostid' => host['hostid'], 'templates' => templates_to_add})
 	  end
 
 	end
@@ -180,6 +176,14 @@ module Zabbix
       response = send_request(message)
 
       return response
+    end
+
+    def get_template_ids(templates)
+      template_ids = []
+      templates.each do |template|
+		template_ids << get_template_id(template)
+      end
+      return template_ids
     end
 
     def unlink_templates_from_hosts(templates_id, hosts_id)
