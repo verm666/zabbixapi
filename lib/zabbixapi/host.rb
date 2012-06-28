@@ -41,6 +41,23 @@ module Zabbix
       return result
     end
 
+    def update_host(params)
+      message = {
+        'method' => 'host.update',
+        'params' => params
+      }
+
+      response = send_request(message)
+
+      unless response.empty? then
+        result = response
+      else
+        result = nil
+      end
+
+      return result
+    end
+
     def get_host_id(hostname)
   
       message = {
@@ -56,6 +73,31 @@ module Zabbix
 
       unless response.empty? then
         result = response[0]['hostid'].to_i
+      else
+        result = nil
+      end
+
+      return result
+    end
+
+    def get_host(hostname)
+  
+      message = {
+        'method' => 'host.get',
+        'params' => {
+          'templated_hosts' => 1,
+          'output' => 'extend',
+          'selectParentTemplates' => 'extend',
+          'filter' => {
+            'host' => hostname
+          }
+        }
+      }
+
+      response = send_request(message)
+
+      unless response.empty? then
+        result = response[0]
       else
         result = nil
       end

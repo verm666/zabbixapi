@@ -1,7 +1,42 @@
 module Zabbix
 
   class ZabbixApi
-    def add_template(template_options)
+
+    def add_templates_to_host(host, new_templates)
+	  host_template_ids = []
+	  new_template_ids = []
+	  templates_to_add = []
+
+	  #Get linked templates
+	  unless host['parentTemplates'].empty? then
+	    host['parentTemplates'].each do |p_template|
+		host_template_ids.push(p_template['hostid'])
+	  end
+	  else
+	    puts 'no parent templates'
+	  end
+
+	  #Get template ids from each of the new templates to be added
+	  new_templates.each do |template|
+		new_template_ids.push(self.get_template_id(template))
+	  end
+
+	  #We want to add both the old templates and the new ones to the host
+	  template_ids_union = new_template_ids | host_template_ids
+
+	  #The host.update method requires a hash parameter for new templates
+	  template_ids_union.each do |template_id|
+		 templates_to_add.push({'templateid' => template_id})
+	  end
+
+	  #Finally, add the templates to the host
+	  template_ids_union.each do |template_id|
+		result = self.update_host({'hostid' => host['hostid'], 'templates' => templates_to_add})
+	  end
+
+	end
+
+	def add_template(template_options)
 
       template_default = {
         'host' => nil,
@@ -41,9 +76,9 @@ module Zabbix
 
       unless ( response.empty? ) then
         result = []
-        response.each_key() do |template_id|
-          result << template_id
-        end
+		response.each do |template_id|
+		  result << template_id
+		end
       else
         result = nil
       end
@@ -91,7 +126,8 @@ module Zabbix
       response = send_request(message)
 
       unless response.empty? then
-        result = response.keys[0]
+        #result = response.keys[0]
+        result = response[0]["templateid"]
       else
         result = nil
       end
