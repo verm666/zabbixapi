@@ -54,6 +54,48 @@ module Zabbix
       return result
     end
 
+    def is_hostgroup_linked?(host_id, group_id)
+
+      message = {
+        'method' => 'hostgroup.get',
+        'params' => {
+        	'groupids' => [ group_id ],
+        	'hostids' => [ host_id ]
+        }
+      }
+
+      response = send_request(message)
+
+      if not ( response.empty? ) then
+        result = true
+      else
+        result = false
+      end
+      
+      return result
+    end
+    	
+    def remove_group_from_host(host_id, group_id)
+
+      message = {
+        'method' => 'hostgroup.massRemove',
+        'params' => {
+          'groupids' => [ group_id ],
+          'hostids' => [ host_id ]
+        }
+      }
+
+      response = send_request(message)
+
+      if not ( response.empty? ) then
+        result = true
+      else
+        result = false
+      end
+      
+      return result
+    end
+
     def add_host_to_group(host_id, group_id)
       
       message = {

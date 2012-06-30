@@ -42,6 +42,7 @@ module Zabbix
     end
 
     def update_host(params)
+
       message = {
         'method' => 'host.update',
         'params' => params
@@ -86,6 +87,7 @@ module Zabbix
         'method' => 'host.get',
         'params' => {
           'templated_hosts' => 1,
+          'select_groups' => 1,
           'output' => 'extend',
           'selectParentTemplates' => 'extend',
           'filter' => {
