@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 
+require 'rubygems'
 require 'json'
 require 'net/http'
 require 'net/https'
@@ -23,12 +24,14 @@ module Zabbix
 
   class ZabbixApi
 
-    attr_accessor :debug
+    attr_accessor :debug, :auth_id
 
     def initialize ( api_url, api_user, api_password )
       @api_url = api_url
       @api_user = api_user
       @api_password = api_password
+      @auth_id = nil
+	  auth()
 
       @debug = false # Disable debug by default
     end
@@ -96,25 +99,24 @@ module Zabbix
     end
 
     def send_request(message)
-      message['auth'] = auth()
+      #message['auth'] = auth()
+      message['auth'] = @auth_id
       do_request(message)
     end
 
     def auth()
 
       auth_message = {
-        'auth' =>  nil,
         'method' =>  'user.authenticate',
         'params' =>  {
           'user' => @api_user,
           'password' => @api_password,
-          '0' => '0'
-        }
+        },
+        'auth' =>  nil
       }
 
-      auth_id = do_request(auth_message)
-
-      return auth_id
+      @auth_id = do_request(auth_message)
+      #return auth_id
     end
 
 # Utils. 

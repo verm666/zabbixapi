@@ -1,7 +1,56 @@
 module Zabbix
 
   class ZabbixApi
-    def add_template(template_options)
+
+    def is_template_linked_with_host?(hostid, template)
+
+	  template_id = get_template_id(template)
+	  host_template_ids = []
+
+	  #Get linked templates
+      linked_templates = get_template_ids_by_host(hostid)
+	  linked_templates.each { |result| host_template_ids << result['templateid'] }
+
+      return (host_template_ids.include? template_id)
+    end
+
+	def remove_templates_from_host(host, templates)
+
+	  template_ids = get_template_ids(templates)
+	  templates_to_remove = []
+
+	  #The host.update method requires a hash parameter for new templates
+	  template_ids.each do |template_id|
+	  	 templates_to_remove << {'templateid' => template_id}
+	  end
+
+      template_ids.each do |template_id|
+	    result = update_host({'hostid' => host['hostid'], 'templates_clear' => templates_to_remove})
+      end
+	end
+
+    def add_templates_to_host(host, templates)
+
+	  host_template_ids = []
+	  templates_to_add = []
+	  new_template_ids = get_template_ids(templates)
+
+	  #Get linked templates
+      linked_templates = get_template_ids_by_host(host['hostid'])
+	  linked_templates.each { |result| host_template_ids << result['templateid'] }
+
+	  #We want to add both the old templates and the new ones to the host
+	  template_ids_union = new_template_ids | host_template_ids
+
+	  #The host.update method requires a hash parameter for new templates
+	  template_ids_union.each do |template_id|
+	  	 templates_to_add << {'templateid' => template_id}
+	  end
+	  result = update_host({'hostid' => host['hostid'], 'templates' => templates_to_add})
+	  return result
+	end
+
+	def add_template(template_options)
 
       template_default = {
         'host' => nil,
@@ -41,9 +90,9 @@ module Zabbix
 
       unless ( response.empty? ) then
         result = []
-        response.each_key() do |template_id|
-          result << template_id
-        end
+		response.each do |template_id|
+		  result << template_id
+		end
       else
         result = nil
       end
@@ -91,7 +140,7 @@ module Zabbix
       response = send_request(message)
 
       unless response.empty? then
-        result = response.keys[0]
+        result = response[0]["templateid"]
       else
         result = nil
       end
@@ -100,12 +149,15 @@ module Zabbix
 
     end
 
-    def link_templates_with_hosts(templates_id, hosts_id)
+	def link_templates_with_hosts(templates_id, hosts_id)
 
       if templates_id.class == Array then
-        message_templates_id = templates_id
+        message_templates_id = []
+        templates_id.each do |template_id|
+          message_templates_id << {'templateid' => template_id}
+        end
       else
-        message_templates_id = [ templates_id ]
+        message_templates_id = {'templateid' => templates_id}
       end
 
       if hosts_id == Array then
@@ -127,12 +179,24 @@ module Zabbix
       return response
     end
 
+
+    def get_template_ids(templates)
+      template_ids = []
+      templates.each do |template|
+		template_ids << get_template_id(template)
+      end
+      return template_ids
+    end
+
     def unlink_templates_from_hosts(templates_id, hosts_id)
 
       if templates_id.class == Array then
-        message_templates_id = templates_id
+        message_templates_id = []
+        templates_id.each do |template_id|
+          message_templates_id << {'templateid' => template_id}
+        end
       else
-        message_templates_id = [ templates_id ]
+        message_templates_id = {'templateid' => templates_id}
       end
 
       if hosts_id == Array then
