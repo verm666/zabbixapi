@@ -41,8 +41,14 @@ module Zabbix
 
       unless ( response.empty? ) then
         result = []
-        response.each_key() do |template_id|
-          result << template_id
+        if response.kind_of? Hash
+          response.each_key() do |template_id|
+            result << template_id
+          end
+        elsif response.kind_of? Array
+          response.each do |template_info|
+            result << template_info['templateid']
+          end
         end
       else
         result = nil
